@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bresenham's Line Algorithm</title>
+</head>
+<body>
+    <canvas id="canvas" width="500" height="500" style="border: 1px solid black;"></canvas>
+
+    <script>
+        function bresenhamLine(x1, y1, x2, y2) {
+            const canvas = document.getElementById("canvas");
+            const ctx = canvas.getContext("2d");
+
+            let dx = Math.abs(x2 - x1);
+            let dy = Math.abs(y2 - y1);
+            let sx = (x1 < x2) ? 1 : -1;
+            let sy = (y1 < y2) ? 1 : -1;
+            let err = dx - dy;
+
+            while (true) {
+                ctx.fillRect(x1, y1, 1, 1);  // Draw pixel
+
+                if (x1 === x2 && y1 === y2) break;
+                let e2 = 2 * err;
+                if (e2 > -dy) {
+                    err -= dy;
+                    x1 += sx;
+                }
+                if (e2 < dx) {
+                    err += dx;
+                    y1 += sy;
+                }
+            }
+        }
+
+        // Call function to draw line
+        bresenhamLine(100, 100, 400, 300);
+    </script>
+</body>
+</html>

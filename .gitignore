@@ -1,0 +1,11 @@
+*.out
+*.a
+*.blend
+*.gltf
+*.bin
+*.obj
+bunny
+drill
+glib
+SDL_bgi
+textures
