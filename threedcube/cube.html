@@ -6,32 +6,104 @@
     <title>3D Cube with WebGL</title>
 </head>
 <body>
-    <canvas id="canvas" width="500" height="500"></canvas>
+    <canvas id="canvas" width="500" height="500" style="margin: 200px;"></canvas>
 
     <script>
         const canvas = document.getElementById("canvas");
         const ctx = canvas.getContext("2d");
 
-        const vertices = new Float32Array([
-            // Vertices for the cube
-            -0.5, -0.5, -0.5,
-             0.5, -0.5, -0.5,
-             0.5,  0.5, -0.5,
-            -0.5,  0.5, -0.5,
-            -0.5, -0.5,  0.5,
-             0.5, -0.5,  0.5,
-             0.5,  0.5,  0.5,
-            -0.5,  0.5,  0.5
-        ]);
+        const viewer = [
+            [200, 200, 300],
+            [0, 0, 300],
+            [50, 50, 300],
+            [0, 0, -300],
+            [50, 50, -300],
+            [200, 200, -300]
+        ]
+
+        const vertices = [
+            [0, 0, 0],
+            [0, 0, 100],
+            [0, 100, 0],
+            [0, 100, 100],
+            [100, 0, 0],
+            [100, 0, 100],
+            [100, 100, 0],
+            [100, 100, 100]
+        ];
+
+        const edges = [
+            [0, 1],
+            [0, 2],
+            [0, 4],
+            [1, 3],
+            [1, 5],
+            [2, 3],
+            [2, 6],
+            [3, 7],
+            [4, 5],
+            [4, 6],
+            [5, 7],
+            [6, 7]
+        ];
         
-        function drawCube() {
-            ctx.fillRect(0, 100, 1, 1);
-            ctx.fillRect(100, 0, 1, 1);
-            ctx.fillRect(0, 0, 1, 1);
-            ctx.fillRect(100, 100, 1, 1);
+        function drawCube(vx, vy, vz) {
+
+            for(let i = 0 ; i < 12 ; i++) {
+                let v1 = vertices[edges[i][0]];
+                let v2 = vertices[edges[i][1]];
+
+                let x1 = Math.trunc((vx * v1[2] + v1[0] * vz) / (vz + v1[2]));
+                let y1 = Math.trunc((vy * v1[2] + v1[1] * vz) / (vz + v1[2]));
+
+                let x2 = Math.trunc((vx * v2[2] + v2[0] * vz) / (vz + v2[2]));
+                let y2 = Math.trunc((vy * v2[2] + v2[1] * vz) / (vz + v2[2]));
+
+                {{/* console.log([x1, y1], [x2, y2]); */}}
+                bresenhamLine(x1, y1, x2, y2);
+            }
         }
 
-        drawCube();
+        function bresenhamLine(x1, y1, x2, y2) {
+            const canvas = document.getElementById("canvas");
+            const ctx = canvas.getContext("2d");
+
+            let dx = Math.abs(x2 - x1);
+            let dy = Math.abs(y2 - y1);
+            let sx = (x1 < x2) ? 1 : -1;
+            let sy = (y1 < y2) ? 1 : -1;
+            let err = dx - dy;
+
+            while (true) {
+                ctx.fillRect(x1, y1, 1, 1);  // Draw pixel
+
+                if (x1 === x2 && y1 === y2) break;
+                let e2 = 2 * err;
+                if (e2 > -dy) {
+                    err -= dy;
+                    x1 += sx;
+                }
+                if (e2 < dx) {
+                    err += dx;
+                    y1 += sy;
+                }
+            }
+        }
+
+        let vx = 200, vy = 200, vz = 50;
+        setInterval(function () {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawCube(vx, vy, vz);
+            vz = 50 + ((vz + 50) % 500);
+        }, 1000);
+
+    /*
+        for(let vz = 100 ; vz < 5000 ; vz+=50) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            {{/* drawCube(viewer[i][0], viewer[i][1], viewer[i][2]); 
+            drawCube(vx, vy, vz);
+        }*/
+        {{/* drawCube(200, 200, 300); */}}
     </script>
 </body>
 </html>
