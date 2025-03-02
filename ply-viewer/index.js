@@ -1,44 +1,146 @@
-document.getElementById('viewerForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Prevent form submission
-
-    const plyFile = document.getElementById('plyFile').files[0];
-    const scale = document.getElementById('scale').value;
-    const viewerLocation = document.getElementById('viewerLocation').value.split(',').map(Number);
-    const projectionPlane = document.getElementById('projectionPlane').value;
-
-    readPLYFile(plyFile, scale, viewerLocation, projectionPlane);
-    
-});
-
-const canvas = document.getElementById("3dCanvas");
+const fileInput = document.getElementById("plyFile");
+const canvas = document.getElementById("canv");
 const ctx = canvas.getContext("2d");
 
-// Example: Placeholder for rendering a grid or shapes
-ctx.fillStyle = '#fff';
-ctx.font = '16px Arial';
-ctx.fillText('3D Viewer Canvas', 10, 20);
+const phi = document.getElementById("phi");
+const theta = document.getElementById("theta");
+const r = document.getElementById("r");
+const scale = document.getElementById("scale");
+const tx = document.getElementById("tx");
+const ty = document.getElementById("ty");
 
-// canvas.width = window.innerWidth;
-// canvas.height = window.innerHeight;
+const phival = document.getElementById("phival");
+const thetaval = document.getElementById("thetaval");
+const rval = document.getElementById("rval");
+const scaleval = document.getElementById("scaleval");
+const txval = document.getElementById("txval");
+const tyval = document.getElementById("tyval");
 
-function readPLYFile(plyFile, scale, viewerLocation, projectionPlane) {
+fileInput.addEventListener("change", function(event) {
+    const file = event.target.files[0];
+    readPLYFile(file);
+})
+
+phi.addEventListener("input", () => {
+    phival.textContent = phi.value;
+    try {
+        render();
+    } catch(error) {
+        console.log(error);
+    }
+});
+theta.addEventListener("input", () => {
+    thetaval.textContent = theta.value;
+    try {
+        render();
+    } catch(error) {
+        console.log(error);
+    }
+});
+r.addEventListener("input", () => {
+    rval.textContent = r.value;
+    try {
+        render();
+    } catch(error) {
+        console.log(error);
+    }
+});
+scale.addEventListener("input", () => {
+    scaleval.textContent = scale.value;
+    try {
+        render();
+    } catch(error) {
+        console.log(error);
+    }
+});
+tx.addEventListener("input", () => {
+    txval.textContent = tx.value;
+    render();
+});
+ty.addEventListener("input", () => {
+    tyval.textContent = ty.value;
+    render();
+});
+
+
+let vertices = [];
+let faces = [];
+let viewerLocation = [0, 0, 100000];
+let S = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+let M1 = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+let T = [[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [100, 600, 0, 1]];
+let v2d = [];
+
+resetCanvas();
+
+function readPLYFile(plyFile) {
   if (!plyFile) return;
   
   const reader = new FileReader();
   
   reader.onload = function(e) {
     const content = e.target.result;
-    parsePLY(content, scale, viewerLocation, projectionPlane);
+    parsePLY(content);
   };
   
   reader.readAsText(plyFile);
 }
 
-function parsePLY(content, scale, viewerLocation, projectionPlane) {
+function resetCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "white";
+    // ctx.fillStyle = '#fff';
+    ctx.font = '16px Arial';
+    // ctx.fillText('3D Viewer Canvas', 10, 20);
+    ctx.fillText('O(0,0)', 0, canvas.height-2);
+    for(let x = 50 ; x < canvas.width ; x += 50) {
+        ctx.fillText('|', x, canvas.height);
+        ctx.fillText('_', 0, x);
+    }
+
+    ctx.fillText('X', canvas.width-15, canvas.height-2);
+    ctx.fillText('Y', 0, 15);
+}
+
+function render() {
+    if(vertices.length == 0) return;
+    updatePoints();
+
+    resetCanvas();
+    plotVertices();
+    plotFaces();
+}
+
+function updatePoints() {
+    viewerLocation = sphericalToCartesian(theta.value, phi.value, r.value);
+
+    S[0][0] = scale.value;
+    S[1][1] = scale.value;
+    S[2][2] = scale.value;
+
+    M1[0][0] = viewerLocation[2];
+    M1[1][1] = viewerLocation[2];
+    M1[2][0] = viewerLocation[0];
+    M1[2][1] = viewerLocation[1];
+
+    T[3][0] = 1*tx.value;
+    T[3][1] = canvas.height - 1*ty.value;
+
+    // v2d = dotProduct(vertices, S);
+    // v2d = dotProduct(v2d, M1);
+    v2d = dotProduct(vertices, M1);
+    v2d = dotProduct(v2d, S);
+    for(let i = 0 ; i < vertices.length ; i++) {
+        v2d[i][0] = Math.trunc(v2d[i][0] / (v2d[i][2] + viewerLocation[2]));
+        v2d[i][1] = Math.trunc(v2d[i][1] / (v2d[i][2] + viewerLocation[2]));
+    }
+
+    v2d = dotProduct(v2d, T);
+}
+
+function parsePLY(content) {
     const lines = content.split('\n');
     let isHeader = true;
-    let vertices = [];
-    let faces = [];
     
     for (let line of lines) {
         line = line.trim();
@@ -58,141 +160,45 @@ function parsePLY(content, scale, viewerLocation, projectionPlane) {
         
         // Parse faces
         if (line.match(/^(\d+\s+){3,}\d+$/)) { // Pattern for faces (list of vertex indices)
-        const face = line.split(' ').map(Number);
-        faces.push(face.slice(1)); // First number is the count of vertices
+            const face = line.split(' ').map(Number);
+            faces.push(face.slice(1)); // First number is the count of vertices
         } else {// Parse vertices
-            const vertex = line.split(' ').map(Number);
+            const vertex = line.split(' ').map(Number).slice(0,3);
+            vertex.push(1);
             vertices.push(vertex);
         }
     }
 
-    shift_vector = [0, 0, 0]
-    
-    for(let i = 0 ; i < vertices.length ; i++) {
-        shift_vector[0] = Math.max(shift_vector[0], -vertices[i][0]);
-        shift_vector[1] = Math.max(shift_vector[1], -vertices[i][1]);
-        shift_vector[2] = Math.max(shift_vector[2], -vertices[i][2]);
-    }
-    
-    for(let i = 0 ; i < vertices.length ; i++) {
-        vertices[i][0] += shift_vector[0];
-        vertices[i][1] += shift_vector[1];
-        vertices[i][2] += shift_vector[2];
-
-        vertices[i][0] *= scale;
-        vertices[i][1] *= scale;
-        vertices[i][2] *= scale;
-    }
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "white";
-    plotVertices(viewerLocation, vertices, projectionPlane);
-    plotFaces(viewerLocation, vertices, faces, projectionPlane);
-}
-
-function projectXY(viewer, point) {
-    let x = Math.trunc((viewer[0]*point[2]+viewer[2]*point[0]) / (viewer[2]+point[2]));
-    let y = Math.trunc((viewer[1]*point[2]+viewer[2]*point[1]) / (viewer[2]+point[2]));
-
-    return [x, y];
-}
-
-function projectXZ(viewer, point) {
-    let x = Math.trunc((viewer[0]*point[1]+viewer[1]*point[0]) / (viewer[1]+point[1]));
-    let z = Math.trunc((viewer[2]*point[1]+viewer[1]*point[2]) / (viewer[1]+point[1]));
-
-    return [x, z];
-}
-
-function projectYZ(viewer, point) {
-    let y = Math.trunc((viewer[1]*point[0]+viewer[0]*point[1]) / (viewer[0]+point[0]));
-    let z = Math.trunc((viewer[2]*point[0]+viewer[0]*point[2]) / (viewer[0]+point[0]));
-
-    return [y, z];
-}
-
-function plotVertex(viewer, vertex, projectionPlane) {
-    switch(projectionPlane) {
-        case "xy":
-            var cord = projectXY(viewer, vertex);
-            var x = cord[0];
-            var y = canvas.height - cord[1];
-            ctx.fillRect(x, y, 1, 1);
-            break;
-        case "yz":
-            cord = projectYZ(viewer, vertex);
-            y = canvas.height - cord[0];
-            var z = canvas.width - cord[1];
-            ctx.fillRect(z, y, 1, 1);
-            break;
-        case "xz":
-            cord = projectXZ(viewer, vertex);
-            x = cord[0];
-            z = cord[1];
-            ctx.fillRect(x, z, 1, 1);
-            break;
+    try {
+        render();
+    } catch(error) {
+        console.log(error);
     }
 }
 
-function plotVertices(viewer, vertices, projectionPlane) {
-    for(let i = 0 ; i < vertices.length ; i++) {
-        plotVertex(viewer, vertices[i], projectionPlane);
+function plotVertices() {
+    for(let i = 0 ; i < v2d.length ; i++) {
+        ctx.fillRect(v2d[i][0], v2d[i][1], 1, 1);
+        // console.log(v2d[i][0], v2d[i][1]);
     }
 }
 
-function plotFaces(viewer, vertices, faces, projectionPlane) {
+function plotFaces() {
+    console.log("Faces");
     for(let i = 0 ; i < faces.length ; i++) {
         for(let j = 0 ; j < faces[i].length ; j++) {
             k = (j + 1) % faces[i].length;
-            switch(projectionPlane) {
-                case "xy":
-                    plotLineXY(viewer, vertices[faces[i][j]], vertices[faces[i][k]]);
-                    break;
-                case "yz":
-                    plotLineYZ(viewer, vertices[faces[i][j]], vertices[faces[i][k]]);
-                    break;
-                case "xz":
-                    plotLineXZ(viewer, vertices[faces[i][j]], vertices[faces[i][k]]);
-                    break;
+            try {
+                plotLineXY(v2d[faces[i][j]], v2d[faces[i][k]]);
+            } catch(error) {
+                console.log("An error occurred:", error.message);
             }
         }
     }
 }
 
-function plotLineXY(viewer, v1, v2) {
-    let cord = projectXY(viewer, v1);
-    let x1 = cord[0];
-    let y1 = canvas.height - cord[1];
-    
-    cord = projectXY(viewer, v2);
-    let x2 = cord[0];
-    let y2 = canvas.height - cord[1];
-    
-    bresenhamLine(x1, y1, x2, y2);
-}
-
-function plotLineYZ(viewer, v1, v2) {
-    let cord = projectYZ(viewer, v1);
-    let y1 = canvas.height - cord[0];
-    let z1 = canvas.width - cord[1];
-    
-    cord = projectYZ(viewer, v2);
-    let y2 = canvas.height - cord[0];
-    let z2 = canvas.width - cord[1];
-    
-    bresenhamLine(z1, y1, z2, y2);
-}
-
-function plotLineXZ(viewer, v1, v2) {
-    let cord = projectXZ(viewer, v1);
-    let x1 = cord[0];
-    let z1 = cord[1];
-    
-    cord = projectXZ(viewer, v2);
-    let x2 = cord[0];
-    let z2 = cord[1];
-    
-    bresenhamLine(x1, z1, x2, z2);
+function plotLineXY(v1, v2) {
+    bresenhamLine(Math.trunc(v1[0]), Math.trunc(v1[1]), Math.trunc(v2[0]), Math.trunc(v2[1]));
 }
 
 function bresenhamLine(x1, y1, x2, y2) {
@@ -216,4 +222,40 @@ function bresenhamLine(x1, y1, x2, y2) {
             y1 += sy;
         }
     }
+}
+
+function dotProduct(A, B) {
+    let rowsA = A.length, colsA = A[0].length,
+        rowsB = B.length, colsB = B[0].length;
+
+    if (colsA !== rowsB) {
+        throw new Error("Invalid dimensions for matrix multiplication");
+    }
+
+    let result = Array(rowsA).fill(0).map(() => Array(colsB).fill(0));
+
+    for (let i = 0; i < rowsA; i++) {
+        for (let j = 0; j < colsB; j++) {
+            for (let k = 0; k < colsA; k++) {
+                result[i][j] += A[i][k] * B[k][j];
+            }
+        }
+    }
+    return result;
+}
+
+function degToRad(degrees) {
+    return degrees * (Math.PI / 180);
+}
+
+// Function to convert Spherical Coordinates to 3D Cartesian Coordinates
+function sphericalToCartesian(thetaDeg, phiDeg, radius) {
+    const theta = degToRad(thetaDeg); // Convert to radians
+    const phi = degToRad(phiDeg);     // Convert to radians
+
+    const x = radius * Math.sin(phi) * Math.cos(theta);
+    const y = radius * Math.sin(phi) * Math.sin(theta);
+    const z = radius * Math.cos(phi);
+
+    return [ x, y, z ];
 }

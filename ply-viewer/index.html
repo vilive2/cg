@@ -7,38 +7,40 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="canvas">
-    <!-- Canvas area for 3D rendering -->
-    <canvas id="3dCanvas" width="900" height="600"></canvas>
+  <div class="container">
 
-    <div class="form-container">
-      <form id="viewerForm">
-        <h2>3D Viewer</h2>
+    <h2>3D Viewer</h2>
+    
+    <!-- Input PLY file -->
+    <label for="plyFile">Upload PLY File:</label>
+    <input type="file" id="plyFile" name="plyFile" accept=".ply" required>
+    
+    <canvas id="canv" width="900" height="600"></canvas>
 
-        <!-- Input PLY file -->
-        <label for="plyFile">Upload PLY File:</label>
-        <input type="file" id="plyFile" name="plyFile" accept=".ply" required>
+    <div class="param">
+      <label for="phi">φ: <span id="phival">90</span>°</label>
+      <input type="range" id="phi" min="0" max="360" value="90">
+      
+      <label for="theta">θ: <span id="thetaval">90</span>°</label>
+      <input type="range" id="theta" min="0" max="360" value="90">
 
-        <!-- Input scale -->
-        <label for="scale">Scale (Number):</label>
-        <input type="number" id="scale" name="scale" min="1" step="100" value="1000" required>
 
-        <!-- Input viewer location -->
-        <label for="viewerLocation">Viewer Location (3D Coordinates):</label>
-        <input type="text" id="viewerLocation" name="viewerLocation" placeholder="e.g., 0,0,0" required>
+      <label for="r">r: <span id="rval">1000</span></label>
+      <input type="range" id="r" min="100" max="10000" value="1000">
 
-        <!-- Input select type of projection plane -->
-        <label for="projectionPlane">Projection Plane:</label>
-        <select id="projectionPlane" name="projectionPlane" required>
-          <option value="xy">XY Plane</option>
-          <option value="yz">YZ Plane</option>
-          <option value="xz">XZ Plane</option>
-        </select>
+      <label for="scale">scale: <span id="scaleval">1000</span></label>
+      <input type="range" id="scale" min="1" max="10000" value="1000">
 
-        <!-- Submit button -->
-        <button type="submit">Submit</button>
-      </form>
     </div>
+
+    <div class="param">
+      <label for="tx">Tx: <span id="txval">0</span></label>
+      <input type="range" id="tx" min="-600" max="600" value="0">
+      
+      <label for="ty">Ty: <span id="tyval">0</span></label>
+      <input type="range" id="ty" min="-600" max="600" value="0">
+    </div>
+  
   </div>
 
   <script src="index.js"></script>
