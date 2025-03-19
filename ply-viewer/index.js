@@ -1,90 +1,20 @@
-const fileInput = document.getElementById("plyFile");
-const canvas = document.getElementById("canv");
-const ctx = canvas.getContext("2d");
-
-const phi = document.getElementById("phi");
-const theta = document.getElementById("theta");
-const r = document.getElementById("r");
-const scale = document.getElementById("scale");
-const tx = document.getElementById("tx");
-const ty = document.getElementById("ty");
-
-const phival = document.getElementById("phival");
-const thetaval = document.getElementById("thetaval");
-const rval = document.getElementById("rval");
-const scaleval = document.getElementById("scaleval");
-const txval = document.getElementById("txval");
-const tyval = document.getElementById("tyval");
-
-fileInput.addEventListener("change", function(event) {
-    const file = event.target.files[0];
-    readPLYFile(file);
-})
-
-phi.addEventListener("input", () => {
-    phival.textContent = phi.value;
-    try {
-        render();
-    } catch(error) {
-        console.log(error);
-    }
-});
-theta.addEventListener("input", () => {
-    thetaval.textContent = theta.value;
-    try {
-        render();
-    } catch(error) {
-        console.log(error);
-    }
-});
-r.addEventListener("input", () => {
-    rval.textContent = r.value;
-    try {
-        render();
-    } catch(error) {
-        console.log(error);
-    }
-});
-scale.addEventListener("input", () => {
-    scaleval.textContent = scale.value;
-    try {
-        render();
-    } catch(error) {
-        console.log(error);
-    }
-});
-tx.addEventListener("input", () => {
-    txval.textContent = tx.value;
-    render();
-});
-ty.addEventListener("input", () => {
-    tyval.textContent = ty.value;
-    render();
-});
-
-
-let vertices = [];
-let faces = [];
 let viewerLocation = [0, 0, 100000];
+let cop = new Vector(0, 0, 10000);
 let S = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
 let M1 = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
 let T = [[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [100, 600, 0, 1]];
 let v2d = [];
 
-resetCanvas();
+const illum = new Illumination(0.1, 0.7, 0.7, [196, 29, 118], [186, 194, 29], [189, 32, 37], 620);
+const lightVec = new Vector(1900, 1600, 0);
+const borderColor = [0, 0, 0];
+const faceColor = [6, 84, 209];
+let trianles = [];
+let verticesVectors = [];
 
-function readPLYFile(plyFile) {
-  if (!plyFile) return;
-  
-  const reader = new FileReader();
-  
-  reader.onload = function(e) {
-    const content = e.target.result;
-    parsePLY(content);
-  };
-  
-  reader.readAsText(plyFile);
-}
+const plyParser = new PlyParser();
+
+resetCanvas();
 
 function resetCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -103,17 +33,17 @@ function resetCanvas() {
 }
 
 function render() {
-    if(vertices.length == 0) return;
+    if(plyParser.vertices.length == 0) return;
     updatePoints();
 
     resetCanvas();
-    // plotVertices();
-    // plotFaces();
-    fillFaces();
+    // fillFaces();
+    fillFacesWithShading();
 }
 
 function updatePoints() {
     viewerLocation = sphericalToCartesian(theta.value, phi.value, r.value);
+    cop = new Vector(viewerLocation[0], viewerLocation[1], viewerLocation[2]);
 
     S[0][0] = scale.value;
     S[1][1] = scale.value;
@@ -127,110 +57,55 @@ function updatePoints() {
     T[3][0] = 1*tx.value;
     T[3][1] = canvas.height - 1*ty.value;
 
-    // v2d = dotProduct(vertices, S);
-    // v2d = dotProduct(v2d, M1);
-    v2d = dotProduct(vertices, M1);
-    v2d = dotProduct(v2d, S);
-    for(let i = 0 ; i < vertices.length ; i++) {
+    v2d = dotProduct(plyParser.vertices, S);
+    v2d = dotProduct(v2d, T);
+
+    verticesVectors = [];
+    for(const vertex of v2d) {
+        verticesVectors.push(new Vector(vertex[0], vertex[1], vertex[2]));
+    }
+
+    trianles = [];
+    for(const face of plyParser.faces) {
+        trianles.push(new Triangle(verticesVectors[face[0]], verticesVectors[face[1]], verticesVectors[face[2]], [255, 0, 0]));
+    }
+
+    v2d = dotProduct(v2d, M1);
+    for(let i = 0 ; i < v2d.length ; i++) {
         v2d[i][0] = Math.trunc(v2d[i][0] / (v2d[i][2] + viewerLocation[2]));
         v2d[i][1] = Math.trunc(v2d[i][1] / (v2d[i][2] + viewerLocation[2]));
-    }
-
-    v2d = dotProduct(v2d, T);
-}
-
-function parsePLY(content) {
-    const lines = content.split('\n');
-    let isHeader = true;
-    
-    for (let line of lines) {
-        line = line.trim();
-        
-        // Skip empty lines or comments
-        if (line.startsWith('ply') || line.startsWith('comment') || line.length === 0) {
-        continue;
-        }
-        
-        // Parse header (skip if isHeader is true)
-        if (isHeader) {
-        if (line.startsWith('end_header')) {
-            isHeader = false;
-        }
-        continue;
-        }
-        
-        // Parse faces
-        if (line.match(/^(\d+\s+){3,}\d+$/)) { // Pattern for faces (list of vertex indices)
-            const face = line.split(' ').map(Number);
-            faces.push(face.slice(1)); // First number is the count of vertices
-        } else {// Parse vertices
-            const vertex = line.split(' ').map(Number).slice(0,3);
-            vertex.push(1);
-            vertices.push(vertex);
-        }
-    }
-
-    try {
-        render();
-    } catch(error) {
-        console.log(error);
-    }
-}
-
-function plotVertices() {
-    for(let i = 0 ; i < v2d.length ; i++) {
-        ctx.fillRect(v2d[i][0], v2d[i][1], 1, 1);
-        // console.log(v2d[i][0], v2d[i][1]);
-    }
-}
-
-function plotFaces() {
-    console.log("Faces");
-    for(let i = 0 ; i < faces.length ; i++) {
-        for(let j = 0 ; j < faces[i].length ; j++) {
-            k = (j + 1) % faces[i].length;
-            try {
-                plotLineXY(v2d[faces[i][j]], v2d[faces[i][k]]);
-            } catch(error) {
-                console.log("An error occurred:", error.message);
-            }
-        }
     }
 }
 
 function fillFaces() {
-    for(let i = 0 ; i < faces.length ; i++) {
-        let pvs = [];
-        for(let j = 0 ; j < faces[i].length ; j++) {
-            pvs.push([Math.trunc(v2d[faces[i][j]][0]), Math.trunc(v2d[faces[i][j]][1])])
-        }
-        fillTriangle(pvs);
+    for(const face of plyParser.faces) {
+        fillTriangle(v2d[face[0]], v2d[face[1]], v2d[face[2]], faceColor, borderColor);
     }
 }
 
-function plotLineXY(v1, v2) {
-    bresenhamLine(Math.trunc(v1[0]), Math.trunc(v1[1]), Math.trunc(v2[0]), Math.trunc(v2[1]));
-}
-
-function bresenhamLine(x1, y1, x2, y2) {
-    let dx = Math.abs(x2 - x1);
-    let dy = Math.abs(y2 - y1);
-    let sx = (x1 < x2) ? 1 : -1;
-    let sy = (y1 < y2) ? 1 : -1;
-    let err = dx - dy;
-
-    while (true) {
-        ctx.fillRect(x1, y1, 1, 1);  // Draw pixel
-
-        if (x1 === x2 && y1 === y2) break;
-        let e2 = 2 * err;
-        if (e2 > -dy) {
-            err -= dy;
-            x1 += sx;
+function fillFacesWithShading() {
+    for(let i = 0 ; i < trianles.length ; i++) {
+        const normal = trianles[i].normal();
+        const viewDir = cop.sub(trianles[i].P);
+        const lightDir = lightVec.sub(trianles[i].P);
+        const face = plyParser.faces[i];
+        if(normal.dot(viewDir) < 0) {
+            fillTriangle(
+                v2d[face[0]],
+                v2d[face[1]],
+                v2d[face[2]],
+                illum.shading(trianles[i].P, normal, lightDir, viewDir),
+                borderColor
+            );
         }
-        if (e2 < dx) {
-            err += dx;
-            y1 += sy;
-        }
+
+        // fillTriangle(
+        //     v2d[face[0]],
+        //     v2d[face[1]],
+        //     v2d[face[2]],
+        //     // faceColor,
+        //     illum.shading(trianles[i].P, normal, lightDir, viewDir),
+        //     borderColor
+        // );
     }
 }
