@@ -5,16 +5,28 @@ const ctx = canvas.getContext("2d");
 const phi = document.getElementById("phi");
 const theta = document.getElementById("theta");
 const r = document.getElementById("r");
-const scale = document.getElementById("scale");
-const tx = document.getElementById("tx");
-const ty = document.getElementById("ty");
+const ka = document.getElementById("ka");
+const kd = document.getElementById("kd");
+const ks = document.getElementById("ks");
+const ia = document.getElementById("ia");
+const id = document.getElementById("id");
+const is = document.getElementById("is");
+const alpha = document.getElementById("alpha");
 
 const phival = document.getElementById("phival");
 const thetaval = document.getElementById("thetaval");
 const rval = document.getElementById("rval");
-const scaleval = document.getElementById("scaleval");
-const txval = document.getElementById("txval");
-const tyval = document.getElementById("tyval");
+const iaval = document.getElementById("iaval");
+const idval = document.getElementById("idval");
+const isval = document.getElementById("isval");
+const alphaval = document.getElementById("alphaval");
+const kaval = document.getElementById("kaval");
+const kdval = document.getElementById("kdval");
+const ksval = document.getElementById("ksval");
+const vloc = document.getElementById("vloc");
+
+const vcounts = document.getElementById("vcounts");
+const facecounts = document.getElementById("facecounts");
 
 fileInput.addEventListener("change", function(event) {
     const file = event.target.files[0];
@@ -45,22 +57,51 @@ r.addEventListener("input", () => {
         console.log(error);
     }
 });
-scale.addEventListener("input", () => {
-    scaleval.textContent = scale.value;
-    try {
-        render();
-    } catch(error) {
-        console.log(error);
+
+document.addEventListener('keydown', function(event) {
+    if(event.ctrlKey) {
+        if(event.key === 'ArrowUp') {
+            scaleby += 100;
+            render();
+        } else if(event.key === 'ArrowDown') {
+            scaleby -= 100;
+            render();
+        }
     }
 });
-tx.addEventListener("input", () => {
-    txval.textContent = tx.value;
+
+ia.addEventListener("input", () => {
+    iaval.textContent = ia.value;
     render();
 });
-ty.addEventListener("input", () => {
-    tyval.textContent = ty.value;
+id.addEventListener("input", () => {
+    idval.textContent = id.value;
     render();
 });
+is.addEventListener("input", () => {
+    isval.textContent = is.value;
+    render();
+});
+alpha.addEventListener("input", () => {
+    alphaval.textContent = alpha.value;
+    render();
+});
+ka.addEventListener("input", () => {
+    const col = hexToRgb(ka.value);
+    kaval.textContent = `(${col[0]}, ${col[1]}, ${col[2]})`;
+    render();
+});
+kd.addEventListener("input", () => {
+    const col = hexToRgb(kd.value);
+    kdval.textContent = `(${col[0]}, ${col[1]}, ${col[2]})`;
+    render();
+});
+ks.addEventListener("input", () => {
+    const col = hexToRgb(ks.value);
+    ksval.textContent = `(${col[0]}, ${col[1]}, ${col[2]})`;
+    render();
+});
+
 
 function readPLYFile(plyFile) {
     if (!plyFile) return;
@@ -70,7 +111,21 @@ function readPLYFile(plyFile) {
     reader.onload = function(e) {
       const content = e.target.result;
       plyParser.parse(content);
+      vcounts.textContent = `${plyParser.vertices.length}`;
+      facecounts.textContent = `${plyParser.faces.length}`;
     };
     
     reader.readAsText(plyFile);
+}
+
+function hexToRgb(hex) {
+    // Remove the '#' if present
+    hex = hex.replace(/^#/, '');
+    
+    // Parse hexadecimal values
+    let r = parseInt(hex.substring(0, 2), 16);
+    let g = parseInt(hex.substring(2, 4), 16);
+    let b = parseInt(hex.substring(4, 6), 16);
+
+    return [r, g, b];
 }

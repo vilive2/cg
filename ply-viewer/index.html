@@ -3,44 +3,79 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3D Viewer</title>
+  <title>Computer Graphics</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="container">
 
-    <h2>3D Viewer</h2>
-    
-    <!-- Input PLY file -->
-    <label for="plyFile">Upload PLY File:</label>
-    <input type="file" id="plyFile" name="plyFile" accept=".ply" required>
-    
-    <canvas id="canv" width="900" height="600"></canvas>
-
-    <div class="param">
-      <label for="phi">φ: <span id="phival">90</span>°</label>
-      <input type="range" id="phi" min="0" max="360" value="90">
+  <div class="bigContainer">
+    <div class="leftContainer">
+      <label for="plyFile">Select PLY File:</label>
+      <input type="file" id="plyFile" name="plyFile" accept=".ply" required>
       
-      <label for="theta">θ: <span id="thetaval">90</span>°</label>
-      <input type="range" id="theta" min="0" max="360" value="90">
+      <h4>Stats</h4>
+      <p><strong>Number of Vertices:</strong><span id="vcounts"></span></p>
+      <p><strong>Number of Faces:</strong><span id="facecounts"></span></p>
 
-
-      <label for="r">r: <span id="rval">1000</span></label>
-      <input type="range" id="r" min="100" max="10000" value="1000">
-
-      <label for="scale">scale: <span id="scaleval">1000</span></label>
-      <input type="range" id="scale" min="1" max="10000" value="1000">
-
+      <h4>Keyboard Shortcuts</h4>
+      <p>Scale Up   : Ctrl + Up Arrow. </p>
+      <p>Scale Down : Ctrl + Down Arrow. </p>
     </div>
 
-    <div class="param">
-      <label for="tx">Tx: <span id="txval">0</span></label>
-      <input type="range" id="tx" min="-600" max="600" value="0">
-      
-      <label for="ty">Ty: <span id="tyval">0</span></label>
-      <input type="range" id="ty" min="-600" max="600" value="0">
+    <div class="container">
+      <canvas id="canv" width="900" height="600"></canvas>
+
+      <div class="param">
+        <label for="phi">φ: <span id="phival">90</span>°</label>
+        <input type="range" id="phi" min="0" max="360" value="90">
+        
+        <label for="theta">θ: <span id="thetaval">90</span>°</label>
+        <input type="range" id="theta" min="0" max="360" value="90">
+
+
+        <label for="r">r: <span id="rval">1000</span></label>
+        <input type="range" id="r" min="100" max="10000" value="1000">
+      </div>
+      <div class="vloc">
+        <label>Viewer location : <span id="vloc"></span></label>
+      </div>
+    
     </div>
-  
+    <div class="rightContainer">
+      
+      <!--div class="param">
+        <label for="tx">Tx: <span id="txval">0</span></label>
+        <input type="range" id="tx" min="-600" max="600" value="0">
+        
+        <label for="ty">Ty: <span id="tyval">0</span></label>
+        <input type="range" id="ty" min="-600" max="600" value="0">
+      </div-->
+
+      <div class="shader">
+        <label for="ka">ka: <span id="kaval">(204, 204, 204)</span></label>
+        <input type="color" id="ka" value="#cccccc">
+        
+        <label for="kd">kd: <span id="kdval">(204, 204, 204)</span></label>
+        <input type="color" id="kd" value="#cccccc">
+        
+        <label for="ks">ks: <span id="ksval">(204, 204, 204)</span></label>
+        <input type="color" id="ks" value="#cccccc">
+      </div>
+
+      <div class="shader">
+        <label for="ia">Ia: <span id="iaval">0.5</span></label>
+        <input type="range" id="ia" min="0" max="1" step="0.01" value="0.5">
+
+        <label for="id">Id: <span id="idval">0.5</span></label>
+        <input type="range" id="id" min="0" max="1" step="0.01" value="0.5">
+
+        <label for="is">Is: <span id="isval">0.5</span></label>
+        <input type="range" id="is" min="0" max="1" step="0.01" value="0.5">
+
+        <label for="alpha">α: <span id="alphaval">50</span></label>
+        <input type="range" id="alpha" min="0" max="10000" step="50" value="50">
+      </div>
+    </div>
   </div>
 
   <script src="events.js"></script>

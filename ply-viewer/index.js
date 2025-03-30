@@ -5,6 +5,8 @@ let M1 = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
 let T = [[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [100, 600, 0, 1]];
 let v2d = [];
 
+let scaleby = 1000;
+
 const illum = new Illumination(0.1, 0.7, 0.7, [196, 29, 118], [186, 194, 29], [189, 32, 37], 620);
 const lightVec = new Vector(1900, 1600, 0);
 const borderColor = [0, 0, 0];
@@ -41,21 +43,61 @@ function render() {
     fillFacesWithShading();
 }
 
+function bringToCenter() {
+    v2d = dotProduct(plyParser.vertices, S);
+    
+    v2d = dotProduct(v2d, M1);
+    for(let i = 0 ; i < v2d.length ; i++) {
+        v2d[i][0] = Math.trunc(v2d[i][0] / (v2d[i][2] + viewerLocation[2]));
+        v2d[i][1] = Math.trunc(v2d[i][1] / (v2d[i][2] + viewerLocation[2]));
+    }
+
+    let xmx = -1000000;
+    let xmn = 10000000;
+    let ymx = -10000000;
+    let ymn = 100000000;
+
+    for(let i = 0 ; i < v2d.length ; i++) {
+        xmx = Math.max(xmx, v2d[i][0]);
+        xmn = Math.min(xmn, v2d[i][0]);
+        ymx = Math.max(ymx, v2d[i][1]);
+        ymn = Math.min(ymn, v2d[i][1]);
+    }
+
+    let cx = Math.trunc((xmn+xmx) / 2);
+    let cy = Math.trunc((ymn+ymx) / 2);
+
+    let tx = (canvas.width / 2) - cx;
+    let ty = (canvas.height / 2) + cy;
+    T[3][0] = tx;
+    T[3][1] = ty;
+}
+
 function updatePoints() {
+    illum.Ia = ia.value;
+    illum.Ip = id.value;
+    illum.Is = is.value;
+    illum.alpha = alpha.value;
+    illum.Ka = hexToRgb(ka.value);
+    illum.Kp = hexToRgb(kd.value);
+    illum.Ks = hexToRgb(ks.value);
+
     viewerLocation = sphericalToCartesian(theta.value, phi.value, r.value);
+    vloc.textContent = `(${viewerLocation[0]}, ${viewerLocation[1]}, ${viewerLocation[2]})`;
     cop = new Vector(viewerLocation[0], viewerLocation[1], viewerLocation[2]);
 
-    S[0][0] = scale.value;
-    S[1][1] = scale.value;
-    S[2][2] = scale.value;
+    S[0][0] = scaleby;
+    S[1][1] = scaleby;
+    S[2][2] = scaleby;
 
     M1[0][0] = viewerLocation[2];
     M1[1][1] = viewerLocation[2];
     M1[2][0] = viewerLocation[0];
     M1[2][1] = viewerLocation[1];
 
-    T[3][0] = 1*tx.value;
-    T[3][1] = canvas.height - 1*ty.value;
+    bringToCenter();
+    // T[3][0] = 1*tx.value;
+    // T[3][1] = canvas.height - 1*ty.value;
 
     v2d = dotProduct(plyParser.vertices, S);
     v2d = dotProduct(v2d, T);

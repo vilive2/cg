@@ -1,18 +1,44 @@
-.body {
+/*.body {
     font-family: Arial, sans-serif;
     display: flex;
     /*justify-content: center;*/
-    /*align-items: center;*/
+    /*align-items: center;/
     height: 100vh;
     background-color: #f0f0f0;
-}
+}*/
+
 body {
     font-family: Arial, sans-serif;
     text-align: center;
     margin: 20px;
+    align-items: horizontal;
     background-color: #f4f4f4;
 }
+
+.bigContainer {
+    display: flex;
+    justify-content: space-between;
+}
+
 .container {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 60%;
+    margin: auto;
+}
+
+.leftContainer {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 60%;
+    margin: auto;
+}
+
+.rightContainer {
     background: white;
     padding: 20px;
     border-radius: 10px;
@@ -35,6 +61,14 @@ canvas {
 }
 
 .param {
+    display: flex;
+    justify-content: space-around;  /* Distribute evenly */
+    align-items: center;  /* Align vertically */
+    flex-wrap: wrap;  /* Prevent overflow */
+    margin-top: 15px;
+}
+
+.shader {
     display: flex;
     justify-content: space-around;  /* Distribute evenly */
     align-items: center;  /* Align vertically */
