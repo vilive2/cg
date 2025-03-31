@@ -6,6 +6,7 @@ let S = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
 let M1 = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
 let T = [[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [100, 600, 0, 1]];
 let v2d = [];
+let vertices = [];
 
 let scaleby = 1000;
 
@@ -56,6 +57,7 @@ function render() {
     updatePoints();
 
     // fillFaces();
+    zBuffer.fill(Infinity);
     fillFacesWithShading();
 }
 
@@ -107,6 +109,7 @@ function updatePoints() {
     v2d = dotProduct(plyParser.vertices, S);
     v2d = dotProduct(v2d, T);
 
+    vertices = v2d;
     verticesVectors = [];
     for(const vertex of v2d) {
         verticesVectors.push(new Vector(vertex[0], vertex[1], vertex[2]));
@@ -131,20 +134,35 @@ function fillFaces() {
 }
 
 function fillFacesWithShading() {
+    // console.log("starting z buffer");
+    let zbuf = Array(canvas.width * canvas.height).fill(Infinity);
+    // let framebuf = Array(canvas.width * canvas.height).fill([0, 0, 0]);
+    const imageData = ctx.createImageData(canvas.width, canvas.height);
+    
     for(let i = 0 ; i < trianles.length ; i++) {
         const normal = trianles[i].normal();
         const viewDir = cop.sub(trianles[i].P);
         const lightDir = lightVec.sub(trianles[i].P);
         const face = plyParser.faces[i];
-        if(normal.dot(viewDir) < 0) {
-            fillTriangle(
-                v2d[face[0]],
-                v2d[face[1]],
-                v2d[face[2]],
-                illum.shading(trianles[i].P, normal, lightDir, viewDir),
-                borderColor
-            );
-        }
+        // if(normal.dot(viewDir) < 0) {
+        //     fillTriangle(
+        //         v2d[face[0]],
+        //         v2d[face[1]],
+        //         v2d[face[2]],
+        //         illum.shading(trianles[i].P, normal, lightDir, viewDir),
+        //         borderColor
+        //     );
+        // }
+
+        fillTriangleZ(v2d[face[0]],v2d[face[1]],v2d[face[2]], 
+            illum.shading(trianles[i].P, normal, lightDir, viewDir), borderColor, 
+            vertices[face[0]][2], vertices[face[1]][2], vertices[face[2]][2], zbuf, imageData.data);
+
+        // ctx.fillStyle = "white";
+        // drawTriangleZ(vertices[face[0]], vertices[face[1]], vertices[face[2]],
+        //     v2d[face[0]], 
+        //     v2d[face[1]], 
+        //     v2d[face[2]]);
 
         // fillTriangle(
         //     v2d[face[0]],
@@ -155,6 +173,17 @@ function fillFacesWithShading() {
         //     borderColor
         // );
     }
+
+    // for(let x = 0 ; x < canvas.width ; x++) {
+    //     for(let y = 0 ; y < canvas.height ; y++) {
+    //         const index = y * canvas.width + x;
+    //         ctx.fillStyle = `rgb(${framebuf[index][0]}, ${framebuf[index][1]}, ${framebuf[index][2]})`;
+    //         ctx.fillRect(x, y, 1, 1);
+    //     }
+    // }
+    ctx.putImageData(imageData, 0, 0);
+
+    // console.log("finished");
 }
 
 function resizeCanvas() {

@@ -18,7 +18,7 @@ const vertices = [
 let verticesVectors = []
 
 let v2d = [];
-let vx = 500, vy = 500, vz = -500;
+let vx = 0, vy = 0, vz = -5000;
 const cop = new Vector(vx, vy, vz);
 
 const faces = [
@@ -68,17 +68,21 @@ function fillCube() {
     let i = 0;
     setInterval(function () {
         if ( i < 12 ) {
-            const normal = trianles[i].normal();
-            const viewDirection = cop.sub(trianles[i].P);
-            const lightDir = light.position.sub(trianles[i].P);
-            if(normal.dot(viewDirection) < 0)
-                fillTriangle(
-                    v2d[faces[i][0]], 
-                    v2d[faces[i][1]], 
-                    v2d[faces[i][2]], 
-                    illum.shading(trianles[i].P, normal, lightDir, viewDirection), 
-                    borderColor
-                );
+            // const normal = trianles[i].normal();
+            // const viewDirection = cop.sub(trianles[i].P);
+            // const lightDir = light.position.sub(trianles[i].P);
+            // if(normal.dot(viewDirection) < 0)
+            //     fillTriangle(
+            //         v2d[faces[i][0]], 
+            //         v2d[faces[i][1]], 
+            //         v2d[faces[i][2]], 
+            //         illum.shading(trianles[i].P, normal, lightDir, viewDirection), 
+            //         borderColor
+            //     );
+            ctx.fillStyle = "white";
+            drawTriangleZ(vertices[faces[i][0]], vertices[faces[i][1]], vertices[faces[i][2]],v2d[faces[i][0]], 
+                        v2d[faces[i][1]], 
+                        v2d[faces[i][2]]);
             i += 1;
         }
     }, 1000);
@@ -110,8 +114,8 @@ for(let i = 0 ; i < faces.length ; i++) {
     ));
 }
 
-width = canvas.width;
-height = canvas.height;
+const width = canvas.width;
+const height = canvas.height;
 
 function visibleSurfaceOnly() {
     for(let x = 0 ; x < width ; x++) {
