@@ -71,34 +71,34 @@ document.addEventListener('keydown', function(event) {
 });
 
 ia.addEventListener("input", () => {
-    iaval.textContent = ia.value;
+    // iaval.textContent = ia.value;
     render();
 });
 id.addEventListener("input", () => {
-    idval.textContent = id.value;
+    // idval.textContent = id.value;
     render();
 });
 is.addEventListener("input", () => {
-    isval.textContent = is.value;
+    // isval.textContent = is.value;
     render();
 });
 alpha.addEventListener("input", () => {
-    alphaval.textContent = alpha.value;
+    // alphaval.textContent = alpha.value;
     render();
 });
 ka.addEventListener("input", () => {
-    const col = hexToRgb(ka.value);
-    kaval.textContent = `(${col[0]}, ${col[1]}, ${col[2]})`;
+    // const col = hexToRgb(ka.value);
+    // kaval.textContent = `(${col[0]}, ${col[1]}, ${col[2]})`;
     render();
 });
 kd.addEventListener("input", () => {
-    const col = hexToRgb(kd.value);
-    kdval.textContent = `(${col[0]}, ${col[1]}, ${col[2]})`;
+    // const col = hexToRgb(kd.value);
+    // kdval.textContent = `(${col[0]}, ${col[1]}, ${col[2]})`;
     render();
 });
 ks.addEventListener("input", () => {
-    const col = hexToRgb(ks.value);
-    ksval.textContent = `(${col[0]}, ${col[1]}, ${col[2]})`;
+    // const col = hexToRgb(ks.value);
+    // ksval.textContent = `(${col[0]}, ${col[1]}, ${col[2]})`;
     render();
 });
 
@@ -113,6 +113,7 @@ function readPLYFile(plyFile) {
       plyParser.parse(content);
       vcounts.textContent = `${plyParser.vertices.length}`;
       facecounts.textContent = `${plyParser.faces.length}`;
+      render();
     };
     
     reader.readAsText(plyFile);

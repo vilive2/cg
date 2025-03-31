@@ -120,9 +120,9 @@ function sphericalToCartesian(thetaDeg, phiDeg, radius) {
     const theta = degToRad(thetaDeg); // Convert to radians
     const phi = degToRad(phiDeg);     // Convert to radians
 
-    const x = radius * Math.sin(phi) * Math.cos(theta);
-    const y = radius * Math.sin(phi) * Math.sin(theta);
-    const z = radius * Math.cos(phi);
+    const x = Math.trunc(radius * Math.sin(phi) * Math.cos(theta));
+    const y = Math.trunc(radius * Math.sin(phi) * Math.sin(theta));
+    const z = Math.trunc(radius * Math.cos(phi));
 
     return [ x, y, z ];
 }

@@ -1,0 +1,53 @@
+<html>
+    <head>
+        <title>Computer Graphics@ISI</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <div id="canvasdiv">
+            <canvas id="canv"></canvas>
+            <div id="shortcuts">
+                <table>
+                    <tr><th>Ctrl + ↑</th><td>Scale up</td></tr>
+                    <tr><th>Ctrl + ↓</th><td>Scale down</td></tr>	
+                </table>
+            </div>
+        </div>
+        <div id="controldiv">
+            <div id="controlholder">
+                <input type="file" id="plyFile" name="plyFile" accept=".ply" required>
+                
+                <div id="stats">
+                    <p><strong>Number of Vertices:</strong><span id="vcounts">0</span></p>
+                    <p><strong>Number of Faces:</strong><span id="facecounts">0</span></p>
+                </div>
+
+                <div id="vcontrol">
+                    <table>
+                        <tr><th>Viewer location: </th><td><span id="vloc"></span></td></tr>
+                        <tr><th>φ: <span id="phival">0</span>°</th><td><input type="range" id="phi" min="0" max="360" value="0"></td></tr>
+                        <tr><th>θ: <span id="thetaval">360</span>°</th><td><input type="range" id="theta" min="0" max="360" value="360"></td></tr>
+                        <tr><th>r: <span id="rval">5000</span></th><td><input type="range" id="r" min="100" max="10000" value="5000"></td></tr>
+                    </table>             
+                </div>
+
+                <div id="shader">
+                    <table>
+                        <tr><th>ka:<input type="color" id="ka" value="#cccccc"></th><td><input type="range" id="ia" min="0" max="1" step="0.01" value="0.5"></td></tr>
+                        <tr><th>kd:<input type="color" id="kd" value="#cccccc"></th><td><input type="range" id="id" min="0" max="1" step="0.01" value="0.5"></td></tr>
+                        <tr><th>ks:<input type="color" id="ks" value="#cccccc"></th><td><input type="range" id="is" min="0" max="1" step="0.01" value="0.5"></td></tr>
+                        <tr><th>α:</th><td><input type="range" id="alpha" min="0" max="10000" step="50" value="50"></td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <script src="ply-viewer/events.js"></script>
+        <script src="math.js"></script>
+        <script src="premitive.js"></script>
+        <script src="filling.js"></script>
+        <script src="ply-viewer/ply_parser.js"></script>
+        <script src="shading.js"></script>
+        <script src="script.js"></script>
+    </body>
+</html>

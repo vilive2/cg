@@ -1,0 +1,99 @@
+html {
+    color: #aaa;
+    background-color: #333;
+    font-family: Arial;
+}
+#canvasdiv {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 70%;
+    text-align: center;
+}
+#canv {
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    pointer-events: none;
+}
+#shortcuts {
+    position: fixed;
+    background-color: rgba(17,197,46,.28);
+    padding: 1em;
+    top: 1em;
+    left: 1em;
+    font-family: monospace;
+}
+#shortcuts table {
+    color: white;
+}
+#shortcuts th, #shortcuts td {
+    text-align: left;
+}
+#shortcuts td {
+    padding-left: .2em;
+}
+#controldiv {
+    position: fixed;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 30%;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    background-color: #444;
+}
+#controlholder {
+    margin: .5em;
+}
+#plyFile {
+    display: block;
+    width: 100%;
+    font-size: 100%;
+    text-align: center;
+    color: #aaa;
+    border: .07em solid #aaa;
+    border-radius: .2em;
+    font-weight: bold;
+    text-decoration: none;
+    background-color: #666;
+}
+#stats {
+    display: block;
+    width: 100%;
+    font-size: 80%;
+    line-height:50%;
+    text-align: left;
+    color: #aaa;
+    border: .07em solid #aaa;
+    border-radius: .2em;
+    background-color: #666;
+}
+#vcontrol, #shader {
+    display: block;
+    font-size: 80%;
+    line-height:50%;
+    width: 100%;
+    text-align: left;
+    border: .07em solid #aaa;
+    border-radius: .2em;
+    background-color: #666;
+}
+
+#vcontrol table, #shader table {
+    color: white;
+    width: 100%;
+}
+#vcontrol th, #vcontrol td, #shader th, #shader td {
+    text-align: left;
+}
+#vcontrol td, #shader td {
+    padding-left: .2em;
+    width: 70%;
+}
+input[type="range"] {
+    flex: 1;  /* Equal width */
+    margin: 0 10px 0 0;
+    width: 90%; 
+}
