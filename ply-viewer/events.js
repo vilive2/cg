@@ -8,7 +8,9 @@ const r = document.getElementById("r");
 const lphi = document.getElementById("lphi");
 const ltheta = document.getElementById("ltheta");
 const lr = document.getElementById("lr");
-const rottheta = document.getElementById("rottheta");
+const rotx = document.getElementById("rotx");
+const roty = document.getElementById("roty");
+const rotz = document.getElementById("rotz");
 const ka = document.getElementById("ka");
 const kd = document.getElementById("kd");
 const ks = document.getElementById("ks");
@@ -90,9 +92,15 @@ lr.addEventListener("input", () => {
         console.log(error);
     }
 });
-rottheta.addEventListener("input", () => {
+rotx.addEventListener("input", () => {
     render();
-})
+});
+roty.addEventListener("input", () => {
+    render();
+});
+rotz.addEventListener("input", () => {
+    render();
+});
 document.addEventListener('keydown', function(event) {
     if(event.ctrlKey) {
         if(event.key === 'ArrowUp') {

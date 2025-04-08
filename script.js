@@ -99,11 +99,22 @@ function bringToCenter() {
 
 function updatePoints() {
 
-    const rotang = degToRad(rottheta.value);
-    R[0][0] = Math.cos(rotang);
-    R[0][2] = -Math.sin(rotang);
-    R[2][0] = Math.sin(rotang);
-    R[2][2] = Math.cos(rotang);
+    const rotangx = degToRad(rotx.value);
+    const rotangy = degToRad(roty.value);
+    const rotangz = degToRad(rotz.value);
+    R[1][2] = -Math.sin(rotangx);
+    R[2][1] = Math.sin(rotangx);
+    
+    R[0][2] = -Math.sin(rotangy);
+    R[2][0] = Math.sin(rotangy);
+    
+    R[0][1] = -Math.sin(rotangz);
+    R[1][0] = Math.sin(rotangz);
+    
+    R[2][2] = Math.cos(rotangx) * Math.cos(rotangy);
+    R[0][0] = Math.cos(rotangy) * Math.cos(rotangz);
+    R[1][1] = Math.cos(rotangx) * Math.cos(rotangz);
+
 
     S[0][0] = scaleby;
     S[1][1] = scaleby;
