@@ -27,7 +27,7 @@
                         <tr><th>Viewer location: </th><td><span id="vloc"></span></td></tr>
                         <tr><th>φ: <span id="phival">0</span>°</th><td><input type="range" id="phi" min="0" max="360" value="0"></td></tr>
                         <tr><th>θ: <span id="thetaval">360</span>°</th><td><input type="range" id="theta" min="0" max="360" value="360"></td></tr>
-                        <tr><th>r: <span id="rval">5000</span></th><td><input type="range" id="r" min="100" max="100000" value="5000"></td></tr>
+                        <tr><th>r: <span id="rval">50000</span></th><td><input type="range" id="r" min="100" max="100000" value="50000"></td></tr>
                     </table>             
                 </div>
 
@@ -37,6 +37,21 @@
                         <tr><th>kd:<input type="color" id="kd" value="#cccccc"></th><td><input type="range" id="id" min="0" max="1" step="0.01" value="0.5"></td></tr>
                         <tr><th>ks:<input type="color" id="ks" value="#cccccc"></th><td><input type="range" id="is" min="0" max="1" step="0.01" value="0.5"></td></tr>
                         <tr><th>α:</th><td><input type="range" id="alpha" min="0" max="10000" step="50" value="50"></td></tr>
+                    </table>
+                </div>
+
+                <div id="lcontrol">
+                    <table>
+                        <tr><th>Light location: </th><td><span id="lloc"></span></td></tr>
+                        <tr><th>φ: <span id="lphival">180</span>°</th><td><input type="range" id="lphi" min="0" max="360" value="180"></td></tr>
+                        <tr><th>θ: <span id="lthetaval">360</span>°</th><td><input type="range" id="ltheta" min="0" max="360" value="360"></td></tr>
+                        <tr><th>r: <span id="lrval">5000</span></th><td><input type="range" id="lr" min="100" max="100000" value="5000"></td></tr>
+                    </table>             
+                </div>
+
+                <div id="rotctrl">
+                    <table>
+                        <tr><th>θ</th><td><input type="range" id="rottheta" min="0" max="360" value="0"></td></tr>
                     </table>
                 </div>
             </div>

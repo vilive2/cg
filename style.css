@@ -70,7 +70,7 @@ html {
     border-radius: .2em;
     background-color: #666;
 }
-#vcontrol, #shader {
+#vcontrol, #shader, #lcontrol, #rotctrl {
     display: block;
     font-size: 80%;
     line-height:50%;
@@ -81,14 +81,14 @@ html {
     background-color: #666;
 }
 
-#vcontrol table, #shader table {
+#vcontrol table, #shader table, #lcontrol table, #rotctrl table {
     color: white;
     width: 100%;
 }
-#vcontrol th, #vcontrol td, #shader th, #shader td {
+#vcontrol th, #vcontrol td, #shader th, #shader td, #lcontrol th, #lcontrol td, #rotctrl th, #rotctrl td {
     text-align: left;
 }
-#vcontrol td, #shader td {
+#vcontrol td, #shader td, #lcontrol td, #rotctrl td {
     padding-left: .2em;
     width: 70%;
 }

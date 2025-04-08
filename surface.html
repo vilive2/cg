@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Taubin Mesh Smoothing</title>
+  <style>body { margin: 0; }</style>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.min.js"></script>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<script>
+  // Scene setup
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 1000);
+  camera.position.z = 5;
+
+  const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById("canvas") });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  // Create a bumpy geometry
+  const geometry = new THREE.PlaneGeometry(2, 2, 20, 20);
+  geometry.verticesNeedUpdate = true;
+
+  // Add some noise
+  for (let v of geometry.vertices) {
+    v.z = 0.2 * Math.sin(5 * v.x) * Math.cos(5 * v.y);
+  }
+
+  const material = new THREE.MeshNormalMaterial({ wireframe: true });
+  const mesh = new THREE.Mesh(geometry, material);
+  scene.add(mesh);
+
+  // Compute Laplacian smoothing
+  function getNeighbors(geometry) {
+    const neighbors = Array.from({ length: geometry.vertices.length }, () => []);
+    for (let face of geometry.faces) {
+      const indices = [face.a, face.b, face.c];
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+          if (i !== j && !neighbors[indices[i]].includes(indices[j])) {
+            neighbors[indices[i]].push(indices[j]);
+          }
+        }
+      }
+    }
+    return neighbors;
+  }
+
+  function taubinSmooth(geometry, iterations = 10, lambda = 0.5, mu = -0.53) {
+    const vertices = geometry.vertices;
+    const neighbors = getNeighbors(geometry);
+
+    for (let iter = 0; iter < iterations; iter++) {
+      const deltas = vertices.map((v, i) => {
+        const n = neighbors[i];
+        if (n.length === 0) return new THREE.Vector3();
+        const avg = n.reduce((sum, j) => sum.add(vertices[j]), new THREE.Vector3()).divideScalar(n.length);
+        return avg.clone().sub(v);
+      });
+
+      // λ step (forward smoothing)
+      for (let i = 0; i < vertices.length; i++) {
+        vertices[i].add(deltas[i].clone().multiplyScalar(lambda));
+      }
+
+      // Recompute new deltas
+      const newDeltas = vertices.map((v, i) => {
+        const n = neighbors[i];
+        if (n.length === 0) return new THREE.Vector3();
+        const avg = n.reduce((sum, j) => sum.add(vertices[j]), new THREE.Vector3()).divideScalar(n.length);
+        return avg.clone().sub(v);
+      });
+
+      // μ step (reverse smoothing)
+      for (let i = 0; i < vertices.length; i++) {
+        vertices[i].add(newDeltas[i].clone().multiplyScalar(mu));
+      }
+    }
+
+    geometry.verticesNeedUpdate = true;
+    geometry.computeVertexNormals();
+  }
+
+  // Apply smoothing
+  taubinSmooth(geometry, 20);
+
+  // Render loop
+  function animate() {
+    requestAnimationFrame(animate);
+    mesh.rotation.y += 0.01;
+    renderer.render(scene, camera);
+  }
+  animate();
+</script>
+</body>
+</html>

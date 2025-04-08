@@ -2,16 +2,18 @@ window.addEventListener('load', resizeCanvas);
 window.addEventListener('resize', resizeCanvas);
 let viewerLocation = [0, 0, 100000];
 let cop = new Vector(0, 0, 10000);
+let R = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
 let S = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
 let M1 = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
 let T = [[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [100, 600, 0, 1]];
 let v2d = [];
 let vertices = [];
 
-let scaleby = 1000;
+let scaleby = 3000;
 
 const illum = new Illumination(0.1, 0.7, 0.7, [196, 29, 118], [186, 194, 29], [189, 32, 37], 620);
-const lightVec = new Vector(1900, 1600, 0);
+let lightVec = new Vector(1900, 1600, 0);
+let lightLocation = [0, 0, 100000];
 const borderColor = [0, 0, 0];
 const faceColor = [6, 84, 209];
 let trianles = [];
@@ -53,17 +55,21 @@ function render() {
     vloc.textContent = `(${viewerLocation[0]}, ${viewerLocation[1]}, ${viewerLocation[2]})`;
     cop = new Vector(viewerLocation[0], viewerLocation[1], viewerLocation[2]);
 
+    lightLocation = sphericalToCartesian(ltheta.value, lphi.value, lr.value)
+    lloc.textContent = `(${lightLocation[0]}, ${lightLocation[1]}, ${lightLocation[2]})`;
+    lightVec = new Vector(lightLocation[0], lightLocation[1], lightLocation[2]);
+
     if(plyParser.vertices.length == 0) return;
     updatePoints();
 
     // fillFaces();
-    zBuffer.fill(Infinity);
+    // zBuffer.fill(Infinity);
     fillFacesWithShading();
 }
 
 function bringToCenter() {
     v2d = dotProduct(plyParser.vertices, S);
-    
+    v2d = dotProduct(v2d, R);
     v2d = dotProduct(v2d, M1);
     for(let i = 0 ; i < v2d.length ; i++) {
         v2d[i][0] = Math.trunc(v2d[i][0] / (v2d[i][2] + viewerLocation[2]));
@@ -93,6 +99,12 @@ function bringToCenter() {
 
 function updatePoints() {
 
+    const rotang = degToRad(rottheta.value);
+    R[0][0] = Math.cos(rotang);
+    R[0][2] = -Math.sin(rotang);
+    R[2][0] = Math.sin(rotang);
+    R[2][2] = Math.cos(rotang);
+
     S[0][0] = scaleby;
     S[1][1] = scaleby;
     S[2][2] = scaleby;
@@ -107,6 +119,7 @@ function updatePoints() {
     // T[3][1] = canvas.height - 1*ty.value;
 
     v2d = dotProduct(plyParser.vertices, S);
+    v2d = dotProduct(v2d, R);
     v2d = dotProduct(v2d, T);
 
     vertices = v2d;
@@ -135,28 +148,29 @@ function fillFaces() {
 
 function fillFacesWithShading() {
     // console.log("starting z buffer");
-    let zbuf = Array(canvas.width * canvas.height).fill(Infinity);
+    // let zbuf = Array(canvas.width * canvas.height).fill(Infinity);
     // let framebuf = Array(canvas.width * canvas.height).fill([0, 0, 0]);
-    const imageData = ctx.createImageData(canvas.width, canvas.height);
+    // const imageData = ctx.createImageData(canvas.width, canvas.height);
     
     for(let i = 0 ; i < trianles.length ; i++) {
         const normal = trianles[i].normal();
         const viewDir = cop.sub(trianles[i].P);
         const lightDir = lightVec.sub(trianles[i].P);
         const face = plyParser.faces[i];
-        // if(normal.dot(viewDir) < 0) {
-        //     fillTriangle(
-        //         v2d[face[0]],
-        //         v2d[face[1]],
-        //         v2d[face[2]],
-        //         illum.shading(trianles[i].P, normal, lightDir, viewDir),
-        //         borderColor
-        //     );
-        // }
+        if(normal.dot(viewDir) < 0) {
+            fillTriangle(
+                v2d[face[0]],
+                v2d[face[1]],
+                v2d[face[2]],
+                illum.shading(trianles[i].P, normal, lightDir, viewDir),
+                borderColor
+            );
+        }
 
-        fillTriangleZ(v2d[face[0]],v2d[face[1]],v2d[face[2]], 
-            illum.shading(trianles[i].P, normal, lightDir, viewDir), borderColor, 
-            vertices[face[0]][2], vertices[face[1]][2], vertices[face[2]][2], zbuf, imageData.data);
+        // Z Buffer
+        // fillTriangleZ(v2d[face[0]],v2d[face[1]],v2d[face[2]], 
+        //     illum.shading(trianles[i].P, normal, lightDir, viewDir), borderColor, 
+        //     vertices[face[0]][2], vertices[face[1]][2], vertices[face[2]][2], zbuf, imageData.data);
 
         // ctx.fillStyle = "white";
         // drawTriangleZ(vertices[face[0]], vertices[face[1]], vertices[face[2]],
@@ -181,7 +195,7 @@ function fillFacesWithShading() {
     //         ctx.fillRect(x, y, 1, 1);
     //     }
     // }
-    ctx.putImageData(imageData, 0, 0);
+    // ctx.putImageData(imageData, 0, 0);
 
     // console.log("finished");
 }

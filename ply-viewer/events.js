@@ -5,6 +5,10 @@ const ctx = canvas.getContext("2d");
 const phi = document.getElementById("phi");
 const theta = document.getElementById("theta");
 const r = document.getElementById("r");
+const lphi = document.getElementById("lphi");
+const ltheta = document.getElementById("ltheta");
+const lr = document.getElementById("lr");
+const rottheta = document.getElementById("rottheta");
 const ka = document.getElementById("ka");
 const kd = document.getElementById("kd");
 const ks = document.getElementById("ks");
@@ -16,6 +20,9 @@ const alpha = document.getElementById("alpha");
 const phival = document.getElementById("phival");
 const thetaval = document.getElementById("thetaval");
 const rval = document.getElementById("rval");
+const lphival = document.getElementById("lphival");
+const lthetaval = document.getElementById("lthetaval");
+const lrval = document.getElementById("lrval");
 const iaval = document.getElementById("iaval");
 const idval = document.getElementById("idval");
 const isval = document.getElementById("isval");
@@ -24,6 +31,7 @@ const kaval = document.getElementById("kaval");
 const kdval = document.getElementById("kdval");
 const ksval = document.getElementById("ksval");
 const vloc = document.getElementById("vloc");
+const lloc = document.getElementById("lloc");
 
 const vcounts = document.getElementById("vcounts");
 const facecounts = document.getElementById("facecounts");
@@ -58,6 +66,33 @@ r.addEventListener("input", () => {
     }
 });
 
+lphi.addEventListener("input", () => {
+    lphival.textContent = lphi.value;
+    try {
+        render();
+    } catch(error) {
+        console.log(error);
+    }
+});
+ltheta.addEventListener("input", () => {
+    lthetaval.textContent = ltheta.value;
+    try {
+        render();
+    } catch(error) {
+        console.log(error);
+    }
+});
+lr.addEventListener("input", () => {
+    lrval.textContent = lr.value;
+    try {
+        render();
+    } catch(error) {
+        console.log(error);
+    }
+});
+rottheta.addEventListener("input", () => {
+    render();
+})
 document.addEventListener('keydown', function(event) {
     if(event.ctrlKey) {
         if(event.key === 'ArrowUp') {

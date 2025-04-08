@@ -29,7 +29,7 @@ function fillTriangle(P, Q, R, faceColor, borderColor) {
             }
         }
         ctx.fillStyle = `rgb(${faceColor[0]}, ${faceColor[1]}, ${faceColor[2]})`;
-        for(let j = l+1 ; j < r ; j++) {
+        for(let j = l ; j <= r ; j++) {
             ctx.fillRect(i+xmn, j+ymn, 1, 1);
         }
 
