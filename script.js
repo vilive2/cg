@@ -145,7 +145,7 @@ function updatePoints() {
 
     trianles = [];
     for(const face of plyParser.faces) {
-        trianles.push(new Triangle(verticesVectors[face[0]], verticesVectors[face[1]], verticesVectors[face[2]], [255, 0, 0]));
+        trianles.push(new Triangle(verticesVectors[face[0]], verticesVectors[face[1]], verticesVectors[face[2]], [0,0,0]));
     }
 
     v2d = dotProduct(v2d, M1);
@@ -171,16 +171,27 @@ function fillFacesWithShading() {
         const normal = trianles[i].normal();
         const viewDir = cop.sub(trianles[i].P);
         const lightDir = lightVec.sub(trianles[i].P);
-        const face = plyParser.faces[i];
-        if(normal.dot(viewDir) < 0) {
-            fillTriangle(
-                v2d[face[0]],
-                v2d[face[1]],
-                v2d[face[2]],
-                illum.shading(trianles[i].P, normal, lightDir, viewDir),
-                borderColor
-            );
-        }
+        trianles[i].color = illum.shading(trianles[i].P, normal, lightDir, viewDir);
+    }
+
+    console.log("ray trace start");
+    rayTrace(ctx, cop, trianles);
+    console.log("ray trace end");
+
+    for(let i = 0 ; i < trianles.length ; i++) {
+        // const normal = trianles[i].normal();
+        // const viewDir = cop.sub(trianles[i].P);
+        // const lightDir = lightVec.sub(trianles[i].P);
+        // const face = plyParser.faces[i];
+        // if(normal.dot(viewDir) < 0) {
+        //     fillTriangle(
+        //         v2d[face[0]],
+        //         v2d[face[1]],
+        //         v2d[face[2]],
+        //         illum.shading(trianles[i].P, normal, lightDir, viewDir),
+        //         borderColor
+        //     );
+        // }
 
         // Z Buffer
         // fillTriangleZ(v2d[face[0]],v2d[face[1]],v2d[face[2]], 

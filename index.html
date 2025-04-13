@@ -56,16 +56,24 @@
                         <tr><th>Rotate Z</th><td><input type="range" id="rotz" min="0" max="360" value="0"></td></tr>
                     </table>
                 </div>
+
+                <div id="prog">
+                    <p><span id="timer">00:00:00</span></p>
+                    <p><span id="progressBar">0%</span></p>
+                </div>
             </div>
         </div>
         
         <script src="ply-viewer/events.js"></script>
         <script src="math.js"></script>
+        <script src="vector.js"></script>
+        <script src="triangle.js"></script>
         <script src="premitive.js"></script>
         <script src="filling.js"></script>
         <script src="ply-viewer/ply_parser.js"></script>
         <script src="shading.js"></script>
         <script src="script.js"></script>
         <script src="z_buffer.js"></script>
+        <script src="ray_trace.js"></script>
     </body>
 </html>
