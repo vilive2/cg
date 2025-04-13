@@ -59,7 +59,10 @@ function fillTriangleZ(P, Q, R, faceColor, borderColor, z1, z2, z3, zbuf, frameb
     bresenhamLineBuf(Q, R, buf);
 
     const ar = arTriangle(P, Q, R);
-    if(ar == 0) return;
+    if(ar === 0) {
+        // console.log(faceColor, ar, P, Q, R);
+        return;
+    }
 
     for(let i = 0 ; i < buf.length ; i++) {
         let l = ymx+1;
@@ -70,21 +73,23 @@ function fillTriangleZ(P, Q, R, faceColor, borderColor, z1, z2, z3, zbuf, frameb
                 r = Math.max(r, j);
             }
         }
-        for(let j = l+1 ; j < r ; j++) {
-            let S = [i+xmn, j+ymn];
-            const w1 = arTriangle(Q, R, S) / ar;
-            const w2 = arTriangle(P, R, S) / ar;
-            const w3 = arTriangle(P, Q, S) / ar;
-            const z = w1 * z1 + w2 * z2 + w3 * z3;
+        ctx.fillStyle = `rgb(${faceColor[0]}, ${faceColor[1]}, ${faceColor[2]})`;
+        for(let j = l ; j <= r ; j++) {
+            // let S = [i+xmn, j+ymn];
+            // const w1 = arTriangle(Q, R, S) / ar;
+            // const w2 = arTriangle(P, R, S) / ar;
+            // const w3 = arTriangle(P, Q, S) / ar;
+            // const z = w1 * z1 + w2 * z2 + w3 * z3;
 
-            const index = S[1]*canvas.width + S[0];
-            if(z < zbuf[index]) {
-                zbuf[index] = z;
-                framebuf[index*4] = faceColor[0];
-                framebuf[index*4 + 1] = faceColor[1];
-                framebuf[index*4 + 2] = faceColor[2];
-                framebuf[index*4 + 3] = 255;
-            }
+            // const index = S[1]*canvas.width + S[0];
+            // if(z < zbuf[index]) {
+            //     zbuf[index] = z;
+            //     framebuf[index*4] = faceColor[0];
+            //     framebuf[index*4 + 1] = faceColor[1];
+            //     framebuf[index*4 + 2] = faceColor[2];
+            //     framebuf[index*4 + 3] = 255;
+                ctx.fillRect(i+xmn, j+ymn, 1, 1);
+            // }
         }
 
         // ctx.fillStyle = `rgb(${borderColor[0]}, ${borderColor[1]}, ${borderColor[2]})`;

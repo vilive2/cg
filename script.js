@@ -38,6 +38,10 @@ function resetCanvas() {
 
     ctx.fillText('X', canvas.width-15, canvas.height-2);
     ctx.fillText('Y', 0, 15);
+
+    // console.log("box draw begin");
+    // drawBox();
+    // console.log("box drawn");
 }
 
 function render() {
@@ -224,4 +228,69 @@ function resizeCanvas() {
     // resetCanvas();
     // Optional: Update WebGL or redraw if needed
     // renderer.setSize(canvas.width, canvas.height);
+}
+
+function drawBox() {
+    const w = canvas.width;
+    const h = canvas.height;
+
+    const cubeVertices = [
+        [0,0,0,1],
+        [w,0,0,1],
+        [w,h,0,1],
+        [0,h,0,1],
+        [0,0,w,1],
+        [w,0,w,1],
+        [w,h,w,1],
+        [0,h,w,1],
+    ];
+
+    const cubeFaces = [
+        [0,1,5],
+        [0,5,4],
+        [1,2,5],
+        [2,5,6],
+        [2,6,7],
+        [2,3,7],
+        [0,3,7],
+        [0,4,7],
+        [4,6,7],
+        [4,5,6]
+    ];
+
+    const edges = [
+        [3, 7],
+        [2, 6],
+        [0, 4],
+        [1, 5],
+        [6, 7],
+        [5, 6],
+        [4, 5],
+        [4, 7]
+    ];
+
+    let cubeProj = dotProduct(cubeVertices, M1);
+    for(let i = 0 ; i < cubeProj.length ; i++) {
+        cubeProj[i][0] = Math.trunc(cubeProj[i][0] / (cubeProj[i][2] + viewerLocation[2]));
+        cubeProj[i][1] = Math.trunc(cubeProj[i][1] / (cubeProj[i][2] + viewerLocation[2]));
+    }
+
+    // console.log('painting wall');
+    // for(let i = 0 ; i < cubeFaces.length ; i++) {
+    //     fillTriangle(
+    //         cubeProj[cubeFaces[i][0]],
+    //         cubeProj[cubeFaces[i][1]],
+    //         cubeProj[cubeFaces[i][2]],
+    //         [197,194,199],
+    //         borderColor
+    //     );
+    // }
+    // console.log('finished');
+
+    ctx.fillStyle = "red";
+    for(let i = 0 ; i < edges.length ; i++) {
+        bresenhamLine(cubeProj[edges[i][0]], cubeProj[edges[i][1]]);
+        console.log(cubeVertices[edges[i][0]], cubeVertices[edges[i][1]]);
+    }
+
 }
