@@ -174,9 +174,7 @@ function fillFacesWithShading() {
         trianles[i].color = illum.shading(trianles[i].P, normal, lightDir, viewDir);
     }
 
-    console.log("ray trace start");
     rayTrace(ctx, cop, trianles);
-    console.log("ray trace end");
 
     for(let i = 0 ; i < trianles.length ; i++) {
         // const normal = trianles[i].normal();

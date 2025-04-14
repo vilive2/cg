@@ -1,56 +1,78 @@
-const epsilon = 0.001;
-const UNSTABLE = -1;
-const RAY_MISSES_PLANE = -2;
+// simple server
+// python3 -m http.server 8000
 
-function Ray(P, Q) {
-    this.P = P;
-    this.d = Q.sub(P).normalize();
-    this.Q = Q;
+// const epsilon = 0.001;
+// const UNSTABLE = -1;
+// const RAY_MISSES_PLANE = -2;
 
-    this.trace = function(ctx, triangles) {
-        let t = Infinity;
-        let col = [0,0,0];
+// function Ray(P, Q) {
+//     this.P = P;
+//     this.d = Q.sub(P).normalize();
+//     this.Q = Q;
 
-        for(const triangle of triangles) {
-            const r = this.rayTriangleIntersection(triangle);
-            if (r === UNSTABLE || r === RAY_MISSES_PLANE) continue;
-            if ( r < t && r >= 0) {
-                t = r;
-                col = triangle.color;
-            }
-        }
+//     this.trace = function(triangles) {
+//         let t = Infinity;
+//         let col = [0,0,0];
 
-        // console.log(this.Q);
-        if (t < Infinity) {
-            // ctx.fillStyle = col;
-            ctx.fillStyle = `rgb(${col[0]}, ${col[1]}, ${col[2]})`;
-            ctx.fillRect(this.Q.x, this.Q.y, 1, 1);
-            // console.log("painted", this.Q.x, this.Q.y, col, t);
-        } else {
-            // console.log("skipped", this.Q.x, this.Q.y, col, t);
-        }
-    };
+//         for(const triangle of triangles) {
+//             const r = this.rayTriangleIntersection(triangle);
+//             if (r === UNSTABLE || r === RAY_MISSES_PLANE) continue;
+//             if ( r < t && r >= 0) {
+//                 t = r;
+//                 col = triangle.color;
+//             }
+//         }
 
-    this.rayTriangleIntersection = function(triangle) {
-        let u = triangle.n.dot(this.d);
+//         return (t < Infinity) ? col : null;
+//         // if (t < Infinity) {
+//         //     // ctx.fillStyle = col;
+//         //     ctx.fillStyle = `rgb(${col[0]}, ${col[1]}, ${col[2]})`;
+//         //     ctx.fillRect(this.Q.x, this.Q.y, 1, 1);
+//         //     // console.log("painted", this.Q.x, this.Q.y, col, t);
+//         // } else {
+//         //     // console.log("skipped", this.Q.x, this.Q.y, col, t);
+//         // }
+//     };
 
-        if(Math.abs(u) < epsilon) return UNSTABLE;
+//     this.rayTriangleIntersection = function(triangle) {
+//         let u = triangle.n.dot(this.d);
 
-        let t = ((triangle.A.sub(this.P)).dot(triangle.n)) / u;
-        if (t < 0) return RAY_MISSES_PLANE;
+//         if(Math.abs(u) < epsilon) return UNSTABLE;
 
-        let Q = this.P.add(this.d.mul(t));
-        let gamma = (Q.sub(triangle.C)).dot(triangle.ACorth);
-        let beta = (Q.sub(triangle.B)).dot(triangle.ABorth);
-        let alpha = 1 - (beta + gamma);
+//         let t = ((triangle.A.sub(this.P)).dot(triangle.n)) / u;
+//         if (t < 0) return RAY_MISSES_PLANE;
 
-        if ( alpha < 0 || beta < 0 || gamma < 0 ) return RAY_MISSES_PLANE;
+//         let Q = this.P.add(this.d.mul(t));
+//         let gamma = (Q.sub(triangle.C)).dot(triangle.ACorth);
+//         let beta = (Q.sub(triangle.B)).dot(triangle.ABorth);
+//         let alpha = 1 - (beta + gamma);
 
-        return t;
-    }
-}
+//         if ( alpha < 0 || beta < 0 || gamma < 0 ) return RAY_MISSES_PLANE;
+
+//         return t;
+//     }
+// }
+
+// onmessage = function (e) {
+//     const { x, ymn, ymx, cop, triangles } = e.data;
+//     const results = [];
+
+//     for (let y = ymn ; y < ymx ; y++) {
+//         const Q = new Vector(x, y, 0);
+//         const ray = new Ray(cop, Q);
+//         const color = ray.trace(triangles);
+//         if (color) {
+//             results.push({ x, y, color});
+//         }
+//     }
+
+//     this.postMessage(results);
+// };
 
 function rayTrace(ctx, cop, triangles) {
+    const rawTriangles = triangles.map(serializeTriangle);
+    const rawCop = serializeVector(cop);
+
     const h = ctx.canvas.height;
     const w = ctx.canvas.width;
 
@@ -85,7 +107,7 @@ function rayTrace(ctx, cop, triangles) {
         const milliseconds = Math.floor(elapsed % 1000);
         const seconds = Math.floor((elapsed % 60000) / 1000);
         const minutes = Math.floor(elapsed / 60000);
-        
+
         timerDisplay.textContent = `${minutes}:${seconds}:${milliseconds}`;
         if(workdone <= 100) {
             progressBar.textContent = `${workdone}%`;
@@ -113,17 +135,50 @@ function rayTrace(ctx, cop, triangles) {
     function processRow() {
         if(x > xmx) return;
 
-        for(let y = ymn ; y < ymx ; y++) {
-            let Q = new Vector(x, y, 0);
-            let ray = new Ray(cop, Q);
-            ray.trace(ctx, triangles);
-            traced += 1;
-        }
-        workdone = Math.floor((traced / totalPixel) * 100);
+        const worker = new Worker("ray-worker.js");
+        worker.postMessage({ x, ymn, ymx, cop: rawCop, triangles: rawTriangles });
+
+        worker.onmessage = function (e) {
+            const results = e.data;
+            for (const { x, y, color } of results) {
+                ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+                ctx.fillRect(x, y, 1, 1);
+            }
+
+            traced += (ymx - ymn);
+            workdone = Math.floor((traced / totalPixel) * 100);
+            x++;
+            processRow();
+            worker.terminate();
+        };
+
+        // for(let y = ymn ; y < ymx ; y++) {
+        //     let Q = new Vector(x, y, 0);
+        //     let ray = new Ray(cop, Q);
+        //     ray.trace(ctx, triangles);
+        //     traced += 1;
+        // }
+        // workdone = Math.floor((traced / totalPixel) * 100);
         
-        x++;
-        setTimeout(processRow, 0);
+        // x++;
+        // setTimeout(processRow, 0);
     }
 
     processRow();
+}
+
+function serializeVector(v) {
+    return {x: v.x, y:v.y, z:v.z};
+}
+
+function serializeTriangle(t) {
+    return {
+        A: serializeVector(t.A),
+        B: serializeVector(t.B),
+        C: serializeVector(t.C),
+        n: serializeVector(t.n),
+        ABorth: serializeVector(t.ABorth),
+        ACorth: serializeVector(t.ACorth),
+        color: t.color
+    };
 }
