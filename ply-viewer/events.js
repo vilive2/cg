@@ -173,3 +173,12 @@ function hexToRgb(hex) {
 
     return [r, g, b];
 }
+
+
+const radios = document.querySelectorAll('input[name="alg"]');
+
+radios.forEach(radio => {
+    radio.addEventListener('change', () => {
+        alg = radio.value;
+    });
+});
