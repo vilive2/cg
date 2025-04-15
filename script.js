@@ -168,16 +168,17 @@ function fillFaces() {
 function fillFacesWithShading() {
     
     for(let i = 0 ; i < trianles.length ; i++) {
-        const normal = trianles[i].normal();
-        const viewDir = cop.sub(trianles[i].P);
-        const lightDir = lightVec.sub(trianles[i].P);
-        trianles[i].color = illum.shading(trianles[i].P, normal, lightDir, viewDir);
+        const normal = trianles[i].n.normalize();
+        const viewDir = cop.sub(trianles[i].A);
+        const lightDir = lightVec.sub(trianles[i].A);
+        trianles[i].color = illum.shading(trianles[i].A, normal, lightDir, viewDir);
     }
 
     if (alg === BACK_FACE_CULLING) {
         backFaceCulling();
     } else if (alg === RAY_TRACE) {
-        rayTrace(ctx, cop, trianles);
+        // rayTrace(ctx, cop, trianles);
+        rayTraceUsingBVH(ctx, cop, trianles);
     } else if (alg === Z_BUFFER) {
         zBuffer();
     } else {
@@ -203,8 +204,8 @@ function zBuffer() {
 
 function backFaceCulling() {
     for(let i = 0 ; i < trianles.length ; i++) {
-        const normal = trianles[i].normal();
-        const viewDir = cop.sub(trianles[i].P);
+        const normal = trianles[i].n.normalize();
+        const viewDir = cop.sub(trianles[i].A);
         const face = plyParser.faces[i];
         if(normal.dot(viewDir) < 0) {
             fillTriangle(
